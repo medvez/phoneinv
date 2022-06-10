@@ -1,12 +1,12 @@
 import argparse
 import ipaddress as ip
+import os.path
 import pandas
 import requests
-import warnings
 from bs4 import BeautifulSoup
 
 
-warnings.simplefilter('ignore')
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class CiscoPhoneInventory:
@@ -26,7 +26,7 @@ class CiscoPhoneInventory:
                 mac, serial = HTTPRequester(host).run()
                 self.phone_parameters[mac] = serial
                 print(f"{host:<13}{' - ':^3}{'OK':>4}")
-            except:
+            except requests.exceptions.ConnectTimeout:
                 print(f"{host:<13}{' - ':^3}{'VOID':>4}")
 
     def run(self):
@@ -65,7 +65,7 @@ class HTTPRequester:
 class DictToExcelConverter:
     def __init__(self, input_dict, output_excel='serials_and_macs.xlsx'):
         self.input_dict = input_dict
-        self.output_excel = output_excel
+        self.output_excel = os.path.join(BASE_DIR, output_excel)
 
     def write_excel(self):
         _frame = pandas.DataFrame.from_dict(self.input_dict, orient='index', columns=['Serial'])
