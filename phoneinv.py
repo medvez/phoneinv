@@ -3,9 +3,12 @@ import ipaddress as ip
 import os.path
 import pandas
 import requests
+import warnings
 from bs4 import BeautifulSoup
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+
+warnings.simplefilter(action='ignore')
 
 
 class CiscoPhoneInventory:
