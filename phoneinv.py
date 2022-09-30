@@ -6,6 +6,7 @@ import requests
 import warnings
 from bs4 import BeautifulSoup
 
+
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 warnings.simplefilter(action='ignore')
@@ -40,23 +41,23 @@ class CiscoPhoneInventory:
 class HTTPRequester:
     def __init__(self, phone_ip_address: str) -> None:
         self.phone_url = 'https://' + phone_ip_address + '/'
-        self.http_tree = None
+        self.soup = None
         self.mac = ''
         self.serial = ''
 
     def get_http_tree(self) -> None:
         http_response = requests.get(self.phone_url, verify=False, timeout=2)
-        self.http_tree = BeautifulSoup(http_response.content, 'lxml')
+        self.soup = BeautifulSoup(http_response.text, features='lxml')
 
     def extract_phone_parameters(self) -> None:
-        phone_parameters_table = self.http_tree.findAll('table')[2]
-        for child in phone_parameters_table.children:
-            parameter_name = child.findAll('td')[0].string.lstrip()
-            parameter_value = child.findAll('td')[2].string
-            if parameter_name.startswith('MAC'):
-                self.mac = parameter_value
-            elif parameter_name.startswith('Serial'):
-                self.serial = parameter_value
+        _data_table = self.soup.body.table.find_all('div', {'align': 'center'})
+        _table_rows = _data_table[0].find_all('tr')
+        for tr in _table_rows:
+            name, _, value = [td.text.strip() for td in tr.children]
+            if name.startswith('MAC'):
+                self.mac = value
+            elif name.startswith('Serial'):
+                self.serial = value
 
     def run(self) -> (str, str):
         self.get_http_tree()
