@@ -7,12 +7,18 @@ import warnings
 from bs4 import BeautifulSoup
 
 
+# Save result inventory file in the folder with program files
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 warnings.simplefilter(action='ignore')
 
 
 class CiscoPhoneInventory:
+    """
+    Main class, that combines the rest functions. It gets input data from CLI,
+    queries every single IP address from the network and puts MAC and serials into
+    resulting dict.
+    """
     def __init__(self) -> None:
         self.phone_parameters = {}
         self.phones_network = ''
@@ -39,6 +45,10 @@ class CiscoPhoneInventory:
 
 
 class HTTPRequester:
+    """
+    This class requests single host IP address, parse web-portal and extracts MAC and serial.
+    This data is returnes as tuple.
+    """
     def __init__(self, phone_ip_address: str) -> None:
         self.phone_url = 'https://' + phone_ip_address + '/'
         self.soup = None
@@ -66,7 +76,14 @@ class HTTPRequester:
 
 
 class DictToExcelConverter:
+    """
+    This is for converting result dict into excel file.
+    """
     def __init__(self, input_dict: dict, output_excel='serials_and_macs.xlsx'):
+        """
+        :param input_dict: dict, where all MACs and serials are stored
+        :param output_excel: the name of excel file, where you want to see MAC-serial table
+        """
         self.input_dict = input_dict
         self.output_excel = os.path.join(BASE_DIR, output_excel)
 
